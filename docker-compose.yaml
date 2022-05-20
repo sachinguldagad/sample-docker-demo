@@ -1,0 +1,52 @@
+version: "3.3"
+services:
+  db:
+    image: mysql:5.7
+    container_name: mysqldb
+    #command: --default-authentication-plugin=mysql_native_password
+    ports: 
+      - 3300:3300
+    environment:
+      - MYSQL_ROOT_PASSWORD=password  
+      - MYSQL_USER=root
+      #- MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=user_database
+    networks: 
+      - sample-nw
+    #volumes:
+    # - "./dbscripts:/docker-entrypoint-initdb.d"  
+  
+  eureka:
+      image: eureka-server
+      container_name: eureka-server
+      ports: 
+        - 8761:8761
+      #depends_on: 
+      #  - db
+      networks: 
+      - sample-nw
+  zuul:
+    image: zuul-service
+    container_name: zuul-service
+    ports: 
+      - 8762:8762
+    #depends_on: 
+    #  - db
+    networks: 
+      - sample-nw 
+   
+  sample:
+      image: sample-service
+      container_name: sample-service
+      ports: 
+        - 9730:9730
+      depends_on: 
+        - db
+        - eureka
+        #- zuul
+      networks: 
+        - sample-nw
+
+networks:
+  sample-nw:
+    driver: bridge 
